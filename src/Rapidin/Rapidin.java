@@ -5,6 +5,16 @@
  */
 package Rapidin;
 
+import Models.Attachment;
+import Models.Email;
+import Models.User;
+import Repositories.AttachmentRepository;
+import Repositories.EmailRepository;
+import Repositories.UserRepository;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Diego Jacobs
@@ -16,6 +26,18 @@ public class Rapidin {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        Attachment attachment = new Attachment(2, "test3.txt");
+        Email email = new Email();
+        try {
+            AttachmentRepository attachmentRepository = new AttachmentRepository();
+            EmailRepository emailRepository = new EmailRepository();
+            email = emailRepository.GetEmailById(2);
+            email.setAttachments(attachmentRepository.GetAttachmentByEmailId(email.getEmailId()));
+            System.out.println(email.toString());
+        } catch (SQLException ex) {
+            Logger lgr = Logger.getLogger(Rapidin.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
     
 }
