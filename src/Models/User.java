@@ -73,4 +73,9 @@ public class User {
     public void setPassword(String Password) {
         this.Password = Password;
     }
+
+    @Override
+    public String toString() {
+        return "User{" + "UserId=" + UserId + ", FirstName=" + FirstName + ", LastName=" + LastName + ", Email=" + Email + '}';
+    }
 }
