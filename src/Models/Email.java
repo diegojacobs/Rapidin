@@ -101,4 +101,9 @@ public class Email {
     public void setAttachments(ArrayList<Attachment> Attachments) {
         this.Attachments = Attachments;
     }
+
+    @Override
+    public String toString() {
+        return "Email{" + "From=" + From + ", To=" + To + ", Subject=" + Subject + ", Content=" + Content + ", Attachments=" + Attachments + '}';
+    }
 }

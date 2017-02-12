@@ -10,6 +10,7 @@ package Models;
  * @author Diego Jacobs
  */
 public class Attachment {
+    private int AttachmentId;
     private int EmailId;
     private String FilePath;
 
@@ -21,6 +22,12 @@ public class Attachment {
         this.FilePath = FilePath;
     }
 
+    public Attachment(int AttachmentId, int EmailId, String FilePath) {
+        this.AttachmentId = AttachmentId;
+        this.EmailId = EmailId;
+        this.FilePath = FilePath;
+    }
+    
     public int getEmailId() {
         return EmailId;
     }
@@ -35,5 +42,10 @@ public class Attachment {
 
     public void setFilePath(String FilePath) {
         this.FilePath = FilePath;
+    }
+
+    @Override
+    public String toString() {
+        return "Attachment{" + "EmailId=" + EmailId + ", FilePath=" + FilePath + '}';
     }
 }
