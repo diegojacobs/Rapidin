@@ -44,6 +44,14 @@ public class Attachment {
         this.FilePath = FilePath;
     }
 
+    public int getAttachmentId() {
+        return AttachmentId;
+    }
+
+    public void setAttachmentId(int AttachmentId) {
+        this.AttachmentId = AttachmentId;
+    }
+    
     @Override
     public String toString() {
         return "Attachment{" + "EmailId=" + EmailId + ", FilePath=" + FilePath + '}';

@@ -90,7 +90,7 @@ public class EmailRepository {
         }
     }
     
-    public Email GetEmailById(int UserId){
+    public Email GetEmailById(int Emaild){
         Email email = new Email();
             
         try {
@@ -99,7 +99,7 @@ public class EmailRepository {
             
             String stm = "SELECT * FROM email WHERE email_id = ?";
             dbContext.PreparedStatement(stm);
-            dbContext.PreparedStatement().setInt(1, UserId);                   
+            dbContext.PreparedStatement().setInt(1, Emaild);                   
             dbContext.ExecutePreparedStatement();
             
             while (dbContext.ResultSet().next()) {
@@ -135,18 +135,18 @@ public class EmailRepository {
         return email;
     }
     
-    public void DeleteEmailById(int EmailId){   
+    public void DeleteEmail(Email email){   
         try {
             if(dbContext.Connection() == null)
                 dbContext.Connect();
             
             String stm = "DELETE FROM email WHERE email_id = ?";
             dbContext.PreparedStatement(stm);
-            dbContext.PreparedStatement().setInt(1, EmailId);                   
+            dbContext.PreparedStatement().setInt(1, email.getEmailId());                   
             dbContext.SaveChanges();
 
         } catch (SQLException ex) {
-            Logger lgr = Logger.getLogger(UserRepository.class.getName());
+            Logger lgr = Logger.getLogger(EmailRepository.class.getName());
             lgr.log(Level.SEVERE, ex.getMessage(), ex);
 
         } finally {
@@ -160,7 +160,7 @@ public class EmailRepository {
                 }
 
             } catch (SQLException ex) {
-                Logger lgr = Logger.getLogger(UserRepository.class.getName());
+                Logger lgr = Logger.getLogger(EmailRepository.class.getName());
                 lgr.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }

@@ -135,14 +135,14 @@ public class UserRepository {
         return user;
     }
     
-    public void DeleteUserById(int UserId){   
+    public void DeleteUser(User user){   
         try {
             if(dbContext.Connection() == null)
                 dbContext.Connect();
             
             String stm = "DELETE FROM my_user WHERE my_user_id = ?";
             dbContext.PreparedStatement(stm);
-            dbContext.PreparedStatement().setInt(1, UserId);                   
+            dbContext.PreparedStatement().setInt(1, user.getUserId());                   
             dbContext.SaveChanges();
 
         } catch (SQLException ex) {
