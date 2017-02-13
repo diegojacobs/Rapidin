@@ -20,41 +20,50 @@ public class RequestParser {
     private ArrayList<String> data = new ArrayList<>();
     
     public String parse(String request){
+        if (request.startsWith("QUIT"))
+            return "Orale\n";
         switch(this.fase){
             // Presentacion
             case 0:
-                if(!request.startsWith("HELO ")) return "500 Mal educado!";
+                if(!request.startsWith("HELO ")) return "500 Mal educado!\n";
                 hostname = request.substring(5);
                 this.fase++;
                 return "250 Que diesel " + hostname;
             // From
             case 1:
-                if(!request.startsWith("MAIL FROM ")) return "500 Rapidin no entiende";
+                if(!request.startsWith("MAIL FROM ")) return "500 Rapidin no entiende\n";
                 source = request.substring(9);
                 this.fase++;
-                return "250 Suave";
+                return "250 Suave\n";
             // To
             case 2:
-                if((!request.startsWith("RCPT TO ")) || (!request.startsWith("DATA"))) return "500 Rapidin no entiende";
+                if((!request.startsWith("RCPT TO ")) && (!request.startsWith("DATA"))) return "500 Rapidin no entiende\n";
                 if(request.startsWith("RCPT TO ")){
-                    destinos.add(request.substring(7));
-                    return "250 Suave";
+                    destinos.add(request.substring(8));
+                    return "250 Suave\n";
                 }
                 this.fase++;
-                return "250 Dejala venir. Para terminar data usa el simbolo \".\"";
+                return "250 Dejala venir. Para terminar data usa el simbolo \".\"\n";
             // Data
             case 3:
-                if(request.equals(".")){
+                if(request.startsWith(".")){
                     this.fase = 1;
-                    return "250 Data recibida";
+                    System.out.println(toString());
+                    // Guardar en DB
+                    this.destinos = new ArrayList<>();
+                    this.data = new ArrayList<>();
+                    return "250 Data recibida\n";
                 }
                 this.data.add(request);
                 return "";
-            default: return "500 Rapidin no entiende";
+            default: return "500 Rapidin no entiende\n";
         }
     }
-    
-    public int getFase(){
-        return this.fase;
+
+    @Override
+    public String toString() {
+        return "Hostname: " + hostname + "\nSource:" + source + "\nDestinos:\n" + destinos.toString() + "\nData:\n" + data.toString();
     }
+    
+    
 }

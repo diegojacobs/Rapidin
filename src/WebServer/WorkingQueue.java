@@ -27,18 +27,19 @@ public class WorkingQueue {
         this.maxSockets = maxSockets;
         System.out.println("CP 1");
         // Llenar SocketPool
-        for(int i=0; i<maxSockets; i++)
-            sockets.add(server.accept());
+        /*for(int i=0; i<maxSockets; i++)
+            sockets.add(server.accept());*/
         System.out.println("CP 2");
     }
 
     public Socket getSocket() throws Exception{
-        synchronized(this){
+        return server.accept();
+        /*synchronized(this){
                 while(workingSockets == maxSockets)
                         wait();
                 workingSockets++;
                 return sockets.remove(0);
-        }
+        }*/
     }
 
     public Socket emergencySocket() throws Exception{

@@ -30,20 +30,17 @@ public class SmtpRequest implements Runnable{
 
     @Override
     public void run(){
-        System.out.println("Yuju");
         try{
             String request = "";
-            System.out.println("\n220 rapidin.com\n");
-            while(request.compareTo("QUIT")!=0){
-                DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            out.write("\n220 rapidin.com\n".getBytes());
+            while(!request.startsWith("QUIT")){                
                 byte[] request_bytes = new byte[size];
                 in.read(request_bytes);
-                request = new String(request_bytes);
-                //System.out.println("\nRequest del cliente: \n" + request + "\n");
-                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                request = new String(request_bytes);                
                 String response = requestParser.parse(request);
                 out.write(response.getBytes());
-                //System.out.println("Response del server: \n" + response);
             }
             socket.close();
             wq.setFree();
