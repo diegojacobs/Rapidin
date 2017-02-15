@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 public class AttachmentRepository {
     private final DBConnector dbContext;
 
-    public AttachmentRepository() throws SQLException {
+    public AttachmentRepository(){
         dbContext = new DBConnector();
     }
     
