@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class UserRepository {
     private final DBConnector dbContext;
 
-    public UserRepository() throws SQLException {
+    public UserRepository(){
         dbContext = new DBConnector();
     }
     
@@ -100,6 +100,51 @@ public class UserRepository {
             String stm = "SELECT * FROM my_user WHERE my_user_id = ?";
             dbContext.PreparedStatement(stm);
             dbContext.PreparedStatement().setInt(1, UserId);                   
+            dbContext.ExecutePreparedStatement();
+            
+            while (dbContext.ResultSet().next()) {
+                user.setUserId(dbContext.ResultSet().getInt(1));
+                user.setFirstName(dbContext.ResultSet().getString(2));
+                user.setLastName(dbContext.ResultSet().getString(3));
+                user.setEmail(dbContext.ResultSet().getString(4));
+                user.setPassword(dbContext.ResultSet().getString(5));
+            }
+            
+            return user;
+
+        } catch (SQLException ex) {
+            Logger lgr = Logger.getLogger(UserRepository.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+
+        } finally {
+
+            try {
+                if (dbContext.PreparedStatement() != null) {
+                    dbContext.ClosePreparedStatement();
+                }
+                if (dbContext.Connection() != null) {
+                    dbContext.CloseConnection();
+                }
+
+            } catch (SQLException ex) {
+                Logger lgr = Logger.getLogger(UserRepository.class.getName());
+                lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+        
+        return user;
+    }
+    
+    public User GetUserByEmail(String email){
+        User user = new User();
+
+        try {
+            if(dbContext.Connection() == null)
+                dbContext.Connect();
+            
+            String stm = "SELECT * FROM my_user WHERE email = ?";
+            dbContext.PreparedStatement(stm);
+            dbContext.PreparedStatement().setString(1, email);                   
             dbContext.ExecutePreparedStatement();
             
             while (dbContext.ResultSet().next()) {

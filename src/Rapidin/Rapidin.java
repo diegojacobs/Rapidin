@@ -27,20 +27,11 @@ public class Rapidin {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        /*Attachment attachment = new Attachment(2, "test3.txt");
-        Email email = new Email();
-        try {
-            AttachmentRepository attachmentRepository = new AttachmentRepository();
-            EmailRepository emailRepository = new EmailRepository();
-            email = emailRepository.GetEmailById(2);
-            email.setAttachments(attachmentRepository.GetAttachmentByEmailId(email.getEmailId()));
-            System.out.println(email.toString());
-        } catch (SQLException ex) {
-            Logger lgr = Logger.getLogger(Rapidin.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
-        }*/
-        WebServer rapidin_server = new WebServer();
-        rapidin_server.run();
+       UserRepository userRepo = new UserRepository();
+       User user = userRepo.GetUserById(1);
+       System.out.println(user.toString());
+        //WebServer rapidin_server = new WebServer();
+        //rapidin_server.run();
     }
     
 }

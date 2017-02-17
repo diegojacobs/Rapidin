@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class EmailRepository {
     private final DBConnector dbContext;
 
-    public EmailRepository() throws SQLException {
+    public EmailRepository(){
         dbContext = new DBConnector();
     }
     
