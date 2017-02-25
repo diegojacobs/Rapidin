@@ -27,11 +27,15 @@ public class Rapidin {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-       UserRepository userRepo = new UserRepository();
-       User user = userRepo.GetUserById(1);
-       System.out.println(user.toString());
-        //WebServer rapidin_server = new WebServer();
-        //rapidin_server.run();
+       /*
+        UserRepository userRepo = new UserRepository();
+       User user = userRepo.GetUserByEmail("eshta");
+       if(user.getUserId() == 0){
+           System.out.println("eshta");
+       }
+       System.out.println(user.toString());*/
+       WebServer rapidin_server = new WebServer();
+       rapidin_server.run();
     }
     
 }

@@ -23,6 +23,7 @@ public class RequestParser {
     private String hostname;
     private String source;
     private ArrayList<String> destinos = new ArrayList<>();
+    private ArrayList<String> forward = new ArrayList<>();
     private ArrayList<String> data = new ArrayList<>();
     private ArrayList<Email> emails = new ArrayList<Email>(); 
     
@@ -36,16 +37,21 @@ public class RequestParser {
         switch(this.fase){
             // Presentacion
             case 0:
-                if(!request.startsWith("HELO ")) return "500 Mal educado!\n";
+                if(!request.startsWith("HELO")) 
+                    return "500 Mal educado!\n";
+                
                 hostname = request.substring(5);
                 this.fase++;
                 return "250 Que diesel " + hostname;
             // From
             case 1:
-                if(!request.startsWith("MAIL FROM ")) return "500 Rapidin no entiende\n";
-                source = request.substring(9);
+                if(!request.startsWith("MAIL FROM:")) 
+                    return "500 Rapidin no entiende\n";
+                
+                source = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
                 User userFrom = _userRepository.GetUserByEmail(source);
-                if(userFrom == null){
+                
+                if(userFrom.getUserId() == 0){
                     return "421 Not a Rapidin user\n";
                 }
                 
@@ -53,18 +59,23 @@ public class RequestParser {
                 return "250 Suave\n";
             // To
             case 2:
-                if((!request.startsWith("RCPT TO ")) && (!request.startsWith("DATA"))) return "500 Rapidin no entiende\n";
-                if(request.startsWith("RCPT TO ")){
-                    String to = request.substring(8);
-                    destinos.add(to);
+                if((!request.startsWith("RCPT TO:")) && (!request.startsWith("DATA"))) 
+                    return "500 Rapidin no entiende\n";
+                
+                if(request.startsWith("RCPT TO: ")){
+                    String to = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
                     User userTo = _userRepository.GetUserByEmail(to);
-                    if (userTo == null){
-                        return "251 User not local; will forward to <forward-path>";
+                    
+                    if (userTo.getUserId() == 0){
+                        forward.add(to);
+                        return "251 User not local; will forward to " + to.substring(to.indexOf("@")) +"\n";
                     }
+                    
+                    destinos.add(userTo.getEmail());
                     return "250 Suave\n";
                 }
                 
-                if(destinos.isEmpty()){
+                if(destinos.isEmpty() && forward.isEmpty()){
                     return "500 Rapidin no entiende\n";
                 }
                 this.fase++;
@@ -72,15 +83,50 @@ public class RequestParser {
             // Data
             case 3:
                 if(request.startsWith(".")){
+                    String subject = new String();
+                    String from = new String();
+                    Boolean isContent = true;
                     this.fase = 1;
                     System.out.println(toString());
+                    
                     // Guardar en DB
                     String content = new String();
-                    for(String line : this.data.subList(1, this.data.size())){
-                        content += line + "\n";
+                    for(String line : this.data){
+                        isContent = true;
+                        
+                        if(line.startsWith("SUBJECT:")){
+                            subject = line.substring(8);
+                            isContent = false;
+                        }
+                        if(line.startsWith("FROM:")){
+                            from = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
+                            userFrom = _userRepository.GetUserByEmail(from);
+                            
+                            if(userFrom.getUserId() == 0){
+                                source = userFrom.getEmail();
+                            }
+                            
+                            isContent = false;
+                        }
+                        
+                        if(line.startsWith("TO:")){
+                            String to = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
+                            User userTo = _userRepository.GetUserByEmail(to);
+                            
+                            if(userTo.getUserId() == 0){
+                                if(!destinos.contains(userTo.getEmail()))
+                                    destinos.add(userTo.getEmail());
+                            }
+                            
+                            isContent = false;
+                        }
+                        
+                        if(isContent)
+                            content += line + "\n";
                     }
+                    
                     for(String to : this.destinos){
-                        emails.add(new Email(source, to, this.data.get(0), content));
+                        emails.add(new Email(source, to, subject, content));
                     }
                     
                     this.destinos = new ArrayList<>();
@@ -89,7 +135,8 @@ public class RequestParser {
                 }
                 this.data.add(request);
                 return "";
-            default: return "500 Rapidin no entiende\n";
+            default: 
+                return "500 Rapidin no entiende\n";
         }
     }
 

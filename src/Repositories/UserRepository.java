@@ -144,7 +144,7 @@ public class UserRepository {
             
             String stm = "SELECT * FROM my_user WHERE email = ?";
             dbContext.PreparedStatement(stm);
-            dbContext.PreparedStatement().setString(1, email);                   
+            dbContext.PreparedStatement().setString(1, email);  
             dbContext.ExecutePreparedStatement();
             
             while (dbContext.ResultSet().next()) {
