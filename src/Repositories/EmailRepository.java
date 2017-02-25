@@ -31,7 +31,7 @@ public class EmailRepository {
             dbContext.PreparedStatement().setString(1, email.getFrom());
             dbContext.PreparedStatement().setString(2, email.getTo());
             dbContext.PreparedStatement().setString(3, email.getSubject()); 
-            dbContext.PreparedStatement().setString(4, email.getContent());                     
+            dbContext.PreparedStatement().setString(4, email.getContent());
             dbContext.SaveChanges();
 
         } catch (SQLException ex) {

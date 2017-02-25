@@ -34,6 +34,7 @@ public class RequestParser {
     public String parse(String request){
         if (request.startsWith("QUIT"))
             return "Orale\n";
+        System.out.println(request);
         switch(this.fase){
             // Presentacion
             case 0:
@@ -45,7 +46,7 @@ public class RequestParser {
                 return "250 Que diesel " + hostname;
             // From
             case 1:
-                if(!request.startsWith("MAIL FROM:")) 
+                if(!request.startsWith("MAIL FROM:") || !request.contains("<") || !request.contains(">")) 
                     return "500 Rapidin no entiende\n";
                 
                 source = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
@@ -62,7 +63,7 @@ public class RequestParser {
                 if((!request.startsWith("RCPT TO:")) && (!request.startsWith("DATA"))) 
                     return "500 Rapidin no entiende\n";
                 
-                if(request.startsWith("RCPT TO: ")){
+                if(request.startsWith("RCPT TO:") && request.contains("<") && request.contains(">")){
                     String to = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
                     User userTo = _userRepository.GetUserByEmail(to);
                     
@@ -92,41 +93,57 @@ public class RequestParser {
                     // Guardar en DB
                     String content = new String();
                     for(String line : this.data){
+                        //Hasta el cambio de linea
+                        line = line.substring(0, line.indexOf(13));
                         isContent = true;
                         
+                        //Si escribio subject lo guardamos
                         if(line.startsWith("SUBJECT:")){
                             subject = line.substring(8);
                             isContent = false;
                         }
+                        
+                        //Si volivo a escribir from, lo cambiamos
                         if(line.startsWith("FROM:")){
-                            from = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                            userFrom = _userRepository.GetUserByEmail(from);
-                            
-                            if(userFrom.getUserId() == 0){
-                                source = userFrom.getEmail();
+                            if(line.contains("<")&& line.contains(">")){
+                                from = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
+                                userFrom = _userRepository.GetUserByEmail(from);
+                                
+                                if(userFrom.getUserId() == 0){
+                                    source = userFrom.getEmail();
+                                }
                             }
                             
                             isContent = false;
                         }
                         
+                        //Si escribe to, miramos si aun no esta en el listado, si no esta lo incluimos
                         if(line.startsWith("TO:")){
-                            String to = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                            User userTo = _userRepository.GetUserByEmail(to);
-                            
-                            if(userTo.getUserId() == 0){
-                                if(!destinos.contains(userTo.getEmail()))
-                                    destinos.add(userTo.getEmail());
+                            if(line.contains("<") && line.contains(">")){
+                                String to = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
+                                User userTo = _userRepository.GetUserByEmail(to);
+
+                                if(userTo.getUserId() == 0 && !userTo.getEmail().equals(null)){
+                                    if(!destinos.contains(userTo.getEmail()))
+                                        destinos.add(userTo.getEmail());
+                                }
+                                else{
+                                    if(!forward.contains(to))
+                                        forward.add(to);
+                                }
                             }
-                            
                             isContent = false;
                         }
                         
                         if(isContent)
                             content += line + "\n";
+
                     }
                     
                     for(String to : this.destinos){
-                        emails.add(new Email(source, to, subject, content));
+                        Email email = new Email(source, to, subject, content);
+                        emails.add(email);
+                        _emailRepository.AddEmail(email);
                     }
                     
                     this.destinos = new ArrayList<>();
