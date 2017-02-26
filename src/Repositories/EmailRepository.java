@@ -6,7 +6,9 @@
 package Repositories;
 
 import Models.Email;
+import Models.User;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -133,6 +135,53 @@ public class EmailRepository {
         }
         
         return email;
+    }
+    
+    public ArrayList<Email> GetEmailByUser(User user){
+        Email email = new Email();
+        ArrayList<Email> emails = new ArrayList<Email>();
+        
+        try {
+            if(dbContext.Connection() == null)
+                dbContext.Connect();
+            
+            String stm = "SELECT * FROM email WHERE to_email = ?";
+            dbContext.PreparedStatement(stm);
+            dbContext.PreparedStatement().setString(1, user.getEmail());                   
+            dbContext.ExecutePreparedStatement();
+            
+            while (dbContext.ResultSet().next()) {
+                email.setEmailId(dbContext.ResultSet().getInt(1));
+                email.setFrom(dbContext.ResultSet().getString(2));
+                email.setTo(dbContext.ResultSet().getString(3));
+                email.setSubject(dbContext.ResultSet().getString(4));
+                email.setContent(dbContext.ResultSet().getString(5));
+                emails.add(email);
+            }
+            
+            return emails;
+
+        } catch (SQLException ex) {
+            Logger lgr = Logger.getLogger(EmailRepository.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+
+        } finally {
+
+            try {
+                if (dbContext.PreparedStatement() != null) {
+                    dbContext.ClosePreparedStatement();
+                }
+                if (dbContext.Connection() != null) {
+                    dbContext.CloseConnection();
+                }
+
+            } catch (SQLException ex) {
+                Logger lgr = Logger.getLogger(EmailRepository.class.getName());
+                lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+        
+        return emails;
     }
     
     public void DeleteEmail(Email email){   

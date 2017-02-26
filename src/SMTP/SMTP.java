@@ -9,12 +9,14 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author DanielAlejandro
  */
-public class SMTP {
+public class SMTP  implements Runnable{
     private int port = 2407;
     private String configFile = "config.txt";
     private int maxThreads = 0;
@@ -44,19 +46,26 @@ public class SMTP {
             System.out.println(e.getMessage());
         }
         maxThreads = configs.get("MaxThreads");        
-        System.out.println("Server MaxThreads: " + String.valueOf(maxThreads));
+        System.out.println("SMTP MaxThreads: " + String.valueOf(maxThreads));
     }
     
-    public void run() throws Exception{
+    @Override
+    public void run(){
         System.out.println("--- RAPIDIN SMTP CONNECTION OPEN ---");        
-        WorkingQueue wq = new WorkingQueue(port, maxThreads);
-        int id = 1;
-        while (true){
-            Socket socket = wq.getSocket();
-            SmtpRequest request = new SmtpRequest(socket, wq, id);
-            Thread thread = new Thread(request);
-            thread.start();
-            id++;
+        WorkingQueue wq;
+        try {
+            wq = new WorkingQueue(port, maxThreads);
+            int id = 1;
+            while (true){
+                Socket socket = wq.getSocket();
+                SmtpRequest request = new SmtpRequest(socket, wq, id);
+                Thread thread = new Thread(request);
+                thread.start();
+                id++;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(SMTP.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
 }

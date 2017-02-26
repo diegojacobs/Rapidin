@@ -36,7 +36,6 @@ public class RequestParser {
     public String parse(String request){
         if (request.startsWith("QUIT"))
             return "Orale\n";
-        System.out.println(request);
         switch(this.fase){
             // Presentacion
             case 0:
@@ -44,7 +43,7 @@ public class RequestParser {
                     return "500 Mal educado!\n";
                 
                 this.fase++;
-                return "250 Que diesel";
+                return "200 Que diesel\n";
             // From
             case 1:
                 if(!request.startsWith("USER:") || !request.contains("<") || !request.contains(">")) 
@@ -55,94 +54,51 @@ public class RequestParser {
 
                 
                 this.fase++;
-                return "250 Suave\n";
+                return "200 Suave\n";
             // To
             case 2:
                 if((!request.startsWith("PASSWORD:")) && (!request.startsWith("DATE:"))) 
                     return "500 Rapidin no entiende\n";
                 
                 if(request.startsWith("PASSWORD:") && request.contains("<") && request.contains(">")){
-                    password = request.substring(request.indexOf('<') + 1, request.indexOf('>'));        
-                    return "250 Suave\n";
+                    password = request.substring(request.indexOf('<') + 1, request.indexOf('>'));      
+                    this.fase++;
+                    return "200 Suave\n";
                 }
                 
                 if(request.startsWith("DATE:") && request.contains("<") && request.contains(">")){
-                    date = request.substring(request.indexOf('<') + 1, request.indexOf('>'));        
-                    return "250 Suave\n";
+                    date = request.substring(request.indexOf('<') + 1, request.indexOf('>'));  
+                    this.fase++;
+                    return "200 Suave\n";
                 }
-
-                this.fase++;
             // Data
             case 3:
-                if(request.startsWith(".")){
-                    String subject = new String();
-                    String from = new String();
-                    Boolean isContent = true;
-                    this.fase = 1;
-                    System.out.println(toString());
+                if(request.startsWith("VALIDATE")){
+                    if(user.getUserId() == 0)
+                        return "404 User not found\n";
                     
-                    // Guardar en DB
-                    String content = new String();
-                    for(String line : this.data){
-                        //Hasta el cambio de linea
-                        line = line.substring(0, line.indexOf(13));
-                        isContent = true;
-                        
-                        //Si escribio subject lo guardamos
-                        if(line.startsWith("SUBJECT:")){
-                            subject = line.substring(8);
-                            isContent = false;
-                        }
-                        
-                        //Si volivo a escribir from, lo cambiamos
-                        if(line.startsWith("FROM:")){
-                            if(line.contains("<")&& line.contains(">")){
-                                from = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                User userFrom = _userRepository.GetUserByEmail(from);
-                                
-                                if(userFrom.getUserId() == 0){
-                                    source = userFrom.getEmail();
-                                }
-                            }
-                            
-                            isContent = false;
-                        }
-                        
-                        //Si escribe to, miramos si aun no esta en el listado, si no esta lo incluimos
-                        if(line.startsWith("TO:")){
-                            if(line.contains("<") && line.contains(">")){
-                                String to = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                User userTo = _userRepository.GetUserByEmail(to);
-
-                                if(userTo.getUserId() == 0 && !userTo.getEmail().equals(null)){
-                                    if(!destinos.contains(userTo.getEmail()))
-                                        destinos.add(userTo.getEmail());
-                                }
-                                else{
-                                    if(!forward.contains(to))
-                                        forward.add(to);
-                                }
-                            }
-                            isContent = false;
-                        }
-                        
-                        if(isContent)
-                            content += line + "\n";
-
-                    }
+                    if(!user.getPassword().equals(password))
+                        return "500 Password Invalido\n";
                     
-                    for(String to : this.destinos){
-                        Email email = new Email(source, to, subject, content);
-                        emails.add(email);
-                        _emailRepository.AddEmail(email);
-                    }
-                    
-                    this.destinos = new ArrayList<>();
-                    this.data = new ArrayList<>();
-                    return "250 Data recibida\n";
+                    this.fase = 0;
+                    return "200 Rapidin user\n";
                 }
-                this.data.add(request);
-                return "";
+                
+                if(request.startsWith("GET")){
+                    if(user.getUserId() != 0 && !user.getEmail().equals(null)){
+                        ArrayList<Email> emails = _emailRepository.GetEmailByUser(user);
+                        
+                        if(emails.size() == 0)
+                            return "500 No hay emails\n";
+                        
+                        this.fase = 0;
+                        return "200 " + emails.toString() + "\n";
+                    }
+                    this.fase = 1;
+                    return "404 No pertenece a Rapidin\n";
+                }
+                
+                return "500 Rapidin no entiende\n";
             default: 
                 return "500 Rapidin no entiende\n";
         }

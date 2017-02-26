@@ -34,7 +34,6 @@ public class RequestParser {
     public String parse(String request){
         if (request.startsWith("QUIT"))
             return "Orale\n";
-        System.out.println(request);
         switch(this.fase){
             // Presentacion
             case 0:
