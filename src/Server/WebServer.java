@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package WebServer;
+package Server;
 
+import SMTP.WorkingQueue;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.Socket;
@@ -12,10 +13,10 @@ import java.util.HashMap;
 
 /**
  *
- * @author DanielAlejandro
+ * @author Diego Jacobs
  */
 public class WebServer {
-    private int port = 2407;
+    private int port = 8000;
     private String configFile = "config.txt";
     private int maxThreads = 0;
     
@@ -53,7 +54,7 @@ public class WebServer {
         int id = 1;
         while (true){
             Socket socket = wq.getSocket();
-            SmtpRequest request = new SmtpRequest(socket, wq, id);
+            WebRequest request = new WebRequest(socket, wq, id);
             Thread thread = new Thread(request);
             thread.start();
             id++;
