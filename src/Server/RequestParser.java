@@ -3,24 +3,26 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package WebServer;
+package Server;
 
 import Models.Email;
 import Models.User;
 import Repositories.EmailRepository;
 import Repositories.UserRepository;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
  *
- * @author DanielAlejandro
+ * @author Diego Jacobs
  */
 public class RequestParser {
     private UserRepository _userRepository;
     private EmailRepository _emailRepository;
+    private User user;
+    private Email email;
     private int fase = 0;
-    private String hostname;
+    private String password;
+    private String date;
     private String source;
     private ArrayList<String> destinos = new ArrayList<>();
     private ArrayList<String> forward = new ArrayList<>();
@@ -41,46 +43,35 @@ public class RequestParser {
                 if(!request.startsWith("HELO")) 
                     return "500 Mal educado!\n";
                 
-                hostname = request.substring(5);
                 this.fase++;
-                return "250 Que diesel " + hostname;
+                return "250 Que diesel";
             // From
             case 1:
-                if(!request.startsWith("MAIL FROM:") || !request.contains("<") || !request.contains(">")) 
+                if(!request.startsWith("USER:") || !request.contains("<") || !request.contains(">")) 
                     return "500 Rapidin no entiende\n";
                 
                 source = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
-                User userFrom = _userRepository.GetUserByEmail(source);
-                
-                if(userFrom.getUserId() == 0){
-                    return "421 Not a Rapidin user\n";
-                }
+                user = _userRepository.GetUserByEmail(source);
+
                 
                 this.fase++;
                 return "250 Suave\n";
             // To
             case 2:
-                if((!request.startsWith("RCPT TO:")) && (!request.startsWith("DATA"))) 
+                if((!request.startsWith("PASSWORD:")) && (!request.startsWith("DATE:"))) 
                     return "500 Rapidin no entiende\n";
                 
-                if(request.startsWith("RCPT TO:") && request.contains("<") && request.contains(">")){
-                    String to = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
-                    User userTo = _userRepository.GetUserByEmail(to);
-                    
-                    if (userTo.getUserId() == 0){
-                        forward.add(to);
-                        return "251 User not local; will forward to " + to.substring(to.indexOf("@")) +"\n";
-                    }
-                    
-                    destinos.add(userTo.getEmail());
+                if(request.startsWith("PASSWORD:") && request.contains("<") && request.contains(">")){
+                    password = request.substring(request.indexOf('<') + 1, request.indexOf('>'));        
                     return "250 Suave\n";
                 }
                 
-                if(destinos.isEmpty() && forward.isEmpty()){
-                    return "500 Rapidin no entiende\n";
+                if(request.startsWith("DATE:") && request.contains("<") && request.contains(">")){
+                    date = request.substring(request.indexOf('<') + 1, request.indexOf('>'));        
+                    return "250 Suave\n";
                 }
+
                 this.fase++;
-                return "354 Dejala venir. Para terminar data usa el simbolo \".\"\n";
             // Data
             case 3:
                 if(request.startsWith(".")){
@@ -107,7 +98,7 @@ public class RequestParser {
                         if(line.startsWith("FROM:")){
                             if(line.contains("<")&& line.contains(">")){
                                 from = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                userFrom = _userRepository.GetUserByEmail(from);
+                                User userFrom = _userRepository.GetUserByEmail(from);
                                 
                                 if(userFrom.getUserId() == 0){
                                     source = userFrom.getEmail();
@@ -159,7 +150,7 @@ public class RequestParser {
 
     @Override
     public String toString() {
-        return "Hostname: " + hostname + "\nSource:" + source + "\nDestinos:\n" + destinos.toString() + "\nData:\n" + data.toString();
+        return "Source:" + source + "\nDestinos:\n" + destinos.toString() + "\nData:\n" + data.toString();
     }
     
     

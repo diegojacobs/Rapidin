@@ -11,7 +11,7 @@ import Models.User;
 import Repositories.AttachmentRepository;
 import Repositories.EmailRepository;
 import Repositories.UserRepository;
-import WebServer.WebServer;
+import SMTP.SMTP;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +34,7 @@ public class Rapidin {
            System.out.println("eshta");
        }
        System.out.println(user.toString());*/
-       WebServer rapidin_server = new WebServer();
+       SMTP rapidin_server = new SMTP();
        rapidin_server.run();
     }
     
