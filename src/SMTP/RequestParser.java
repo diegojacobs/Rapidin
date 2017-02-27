@@ -22,8 +22,14 @@ public class RequestParser {
     private int fase = 0;
     private String hostname;
     private String source;
+    
     private ArrayList<String> destinos = new ArrayList<>();
     private ArrayList<String> forward = new ArrayList<>();
+    
+    private ArrayList<String> to = new ArrayList<>();
+    private ArrayList<String> cc = new ArrayList<>();
+    private ArrayList<String> bcc = new ArrayList<>();
+    
     private ArrayList<String> data = new ArrayList<>();
     private ArrayList<Email> emails = new ArrayList<Email>(); 
     
@@ -34,7 +40,6 @@ public class RequestParser {
     public String parse(String request){
         if (request.startsWith("QUIT"))
             return "Orale\n";
-        System.out.println(request);
         switch(this.fase){
             // Presentacion
             case 0:
@@ -50,11 +55,6 @@ public class RequestParser {
                     return "500 Rapidin no entiende\n";
                 
                 source = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
-                User userFrom = _userRepository.GetUserByEmail(source);
-                
-                if(userFrom.getUserId() == 0){
-                    return "421 Not a Rapidin user\n";
-                }
                 
                 this.fase++;
                 return "250 Suave\n";
@@ -88,7 +88,6 @@ public class RequestParser {
                     String from = new String();
                     Boolean isContent = true;
                     this.fase = 1;
-                    System.out.println(toString());
                     
                     // Guardar en DB
                     String content = new String();
@@ -107,11 +106,7 @@ public class RequestParser {
                         if(line.startsWith("FROM:")){
                             if(line.contains("<")&& line.contains(">")){
                                 from = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                userFrom = _userRepository.GetUserByEmail(from);
-                                
-                                if(userFrom.getUserId() == 0){
-                                    source = userFrom.getEmail();
-                                }
+                                source = from;
                             }
                             
                             isContent = false;
@@ -123,13 +118,67 @@ public class RequestParser {
                                 String to = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
                                 User userTo = _userRepository.GetUserByEmail(to);
 
-                                if(userTo.getUserId() == 0 && !userTo.getEmail().equals(null)){
+                                if(userTo.getUserId() != 0 && !userTo.getEmail().equals(null)){
                                     if(!destinos.contains(userTo.getEmail()))
                                         destinos.add(userTo.getEmail());
+                                    
+                                    if(!this.to.contains(to))
+                                        this.to.add(userTo.getEmail());
                                 }
                                 else{
                                     if(!forward.contains(to))
                                         forward.add(to);
+                                    
+                                    if(!this.to.contains(to))
+                                        this.to.add(to);
+                                }
+                            }
+                            isContent = false;
+                        }
+                        
+                        //Si escribe cc, miramos si aun no esta en el listado, si no esta lo incluimos
+                        if(line.startsWith("CC:")){
+                            if(line.contains("<") && line.contains(">")){
+                                String cc = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
+                                User userCc = _userRepository.GetUserByEmail(cc);
+
+                                if(userCc.getUserId() != 0 && !userCc.getEmail().equals(null)){
+                                    if(!destinos.contains(userCc.getEmail()))
+                                        destinos.add(userCc.getEmail());
+                                    
+                                    if(!this.cc.contains(cc))
+                                        this.cc.add(userCc.getEmail());
+                                }
+                                else{
+                                    if(!forward.contains(cc))
+                                        forward.add(cc);
+                                    
+                                    if(!this.cc.contains(cc))
+                                        this.cc.add(userCc.getEmail());
+                                }
+                            }
+                            isContent = false;
+                        }
+                        
+                        //Si escribe bcc, miramos si aun no esta en el listado, si no esta lo incluimos
+                        if(line.startsWith("BCC:")){
+                            if(line.contains("<") && line.contains(">")){
+                                String bcc = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
+                                User userBcc = _userRepository.GetUserByEmail(bcc);
+
+                                if(userBcc.getUserId() != 0 && !userBcc.getEmail().equals(null)){
+                                    if(!destinos.contains(userBcc.getEmail()))
+                                        destinos.add(userBcc.getEmail());
+                                    
+                                    if(!this.bcc.contains(bcc))
+                                        this.bcc.add(userBcc.getEmail());
+                                }
+                                else{
+                                    if(!forward.contains(bcc))
+                                        forward.add(bcc);
+                                    
+                                    if(!this.bcc.contains(bcc))
+                                        this.bcc.add(bcc);
                                 }
                             }
                             isContent = false;
@@ -141,9 +190,13 @@ public class RequestParser {
                     }
                     
                     for(String to : this.destinos){
-                        Email email = new Email(source, to, subject, content);
-                        emails.add(email);
+                        Email email = new Email(this.source, to, this.source, this.to, this.cc, this.bcc, subject, content);
                         _emailRepository.AddEmail(email);
+                    }
+                    
+                    for(String to : this.forward){
+                        Email email = new Email(this.source, to, this.source, this.to, this.cc, this.bcc, subject, content);
+                        emails.add(email);
                     }
                     
                     this.destinos = new ArrayList<>();
@@ -159,6 +212,8 @@ public class RequestParser {
 
     @Override
     public String toString() {
-        return "Hostname: " + hostname + "\nSource:" + source + "\nDestinos:\n" + destinos.toString() + "\nData:\n" + data.toString();
+        return "RequestParser{" + "hostname=" + hostname + ", source=" + source + ", destinos=" + destinos + ", forward=" + forward + ", to=" + to + ", cc=" + cc + ", bcc=" + bcc + ", data=" + data + ", emails=" + emails + '}';
     }
+
+    
 }

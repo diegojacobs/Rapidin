@@ -25,11 +25,6 @@ public class WorkingQueue {
         sockets = new ArrayList<Socket>();
         workingSockets = 0;
         this.maxSockets = maxSockets;
-        System.out.println("CP 1");
-        // Llenar SocketPool
-        /*for(int i=0; i<maxSockets; i++)
-            sockets.add(server.accept());*/
-        System.out.println("CP 2");
     }
 
     public Socket getSocket() throws Exception{

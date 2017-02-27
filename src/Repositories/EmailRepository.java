@@ -6,9 +6,15 @@
 package Repositories;
 
 import Models.Email;
+import Models.User;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  *
@@ -26,12 +32,16 @@ public class EmailRepository {
             if(dbContext.Connection() == null)
                 dbContext.Connect();
             
-            String stm = "INSERT INTO email (from_email, to_email, subject, content) VALUES(?, ?, ?, ?)";
+            String stm = "INSERT INTO email (from_email, to_email, subject, content, labelFrom, labelTo, cc, bcc, date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, now())";
             dbContext.PreparedStatement(stm);
             dbContext.PreparedStatement().setString(1, email.getFrom());
             dbContext.PreparedStatement().setString(2, email.getTo());
             dbContext.PreparedStatement().setString(3, email.getSubject()); 
             dbContext.PreparedStatement().setString(4, email.getContent());
+            dbContext.PreparedStatement().setString(5, email.getLabelFrom());
+            dbContext.PreparedStatement().setString(6, email.getLabelTo().toString());
+            dbContext.PreparedStatement().setString(7, email.getCc().toString()); 
+            dbContext.PreparedStatement().setString(8, email.getBcc().toString());
             dbContext.SaveChanges();
 
         } catch (SQLException ex) {
@@ -135,6 +145,62 @@ public class EmailRepository {
         return email;
     }
     
+    public ArrayList<Email> GetEmailByUser(User user, Timestamp date){
+        Email email = new Email();
+        ArrayList<Email> emails = new ArrayList<Email>();
+        
+        try {
+            if(dbContext.Connection() == null)
+                dbContext.Connect();
+            
+            String stm = "SELECT * FROM email WHERE to_email = ? && createddate > ?";
+            dbContext.PreparedStatement(stm);
+            dbContext.PreparedStatement().setString(1, user.getEmail());  
+            dbContext.PreparedStatement().setTimestamp(2, date);  
+            dbContext.ExecutePreparedStatement();
+            
+            while (dbContext.ResultSet().next()) {
+                email = new Email();
+                
+                email.setEmailId(dbContext.ResultSet().getInt(1));
+                email.setFrom(dbContext.ResultSet().getString(2));
+                email.setTo(dbContext.ResultSet().getString(3));
+                email.setSubject(dbContext.ResultSet().getString(4));
+                email.setContent(dbContext.ResultSet().getString(5));
+                email.setDate(dbContext.ResultSet().getDate(6));
+                email.setLabelFrom(dbContext.ResultSet().getString(7));
+                email.setLabelTo(parseToArrayList(dbContext.ResultSet().getString(8)));
+                email.setCc(parseToArrayList(dbContext.ResultSet().getString(9)));
+                email.setBcc(parseToArrayList(dbContext.ResultSet().getString(10)));
+                
+                emails.add(email);
+            }
+            
+            return emails;
+
+        } catch (SQLException ex) {
+            Logger lgr = Logger.getLogger(EmailRepository.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+
+        } finally {
+
+            try {
+                if (dbContext.PreparedStatement() != null) {
+                    dbContext.ClosePreparedStatement();
+                }
+                if (dbContext.Connection() != null) {
+                    dbContext.CloseConnection();
+                }
+
+            } catch (SQLException ex) {
+                Logger lgr = Logger.getLogger(EmailRepository.class.getName());
+                lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+        
+        return emails;
+    }
+    
     public void DeleteEmail(Email email){   
         try {
             if(dbContext.Connection() == null)
@@ -164,5 +230,16 @@ public class EmailRepository {
                 lgr.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
+    }
+    
+    public ArrayList<String> parseToArrayList(String data){
+        ArrayList<String> array = new ArrayList<String>();
+        if(data == null || data.isEmpty())
+            return array;
+        
+        List<String> list = Arrays.asList(data.substring(1, data.length() - 1).split(", ")); 
+        array = new ArrayList<String>(list);
+        
+        return array;
     }
 }
