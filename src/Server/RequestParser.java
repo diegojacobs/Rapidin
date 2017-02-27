@@ -9,6 +9,8 @@ import Models.Email;
 import Models.User;
 import Repositories.EmailRepository;
 import Repositories.UserRepository;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 /**
@@ -22,7 +24,7 @@ public class RequestParser {
     private Email email;
     private int fase = 0;
     private String password;
-    private String date;
+    private Timestamp date;
     private String source;
     private ArrayList<String> destinos = new ArrayList<>();
     private ArrayList<String> forward = new ArrayList<>();
@@ -36,6 +38,7 @@ public class RequestParser {
     public String parse(String request){
         if (request.startsWith("QUIT"))
             return "Orale\n";
+        System.out.println(request);
         switch(this.fase){
             // Presentacion
             case 0:
@@ -67,18 +70,18 @@ public class RequestParser {
                 }
                 
                 if(request.startsWith("DATE:") && request.contains("<") && request.contains(">")){
-                    date = request.substring(request.indexOf('<') + 1, request.indexOf('>'));  
+                    date = Timestamp.valueOf(request.substring(request.indexOf('<') + 1, request.indexOf('>')));  
                     this.fase++;
                     return "200 Suave\n";
                 }
-            // Data
+            // Action
             case 3:
                 if(request.startsWith("VALIDATE")){
                     if(user.getUserId() == 0)
-                        return "404 User not found\n";
+                        return "404 No es Rapidin\n";
                     
                     if(!user.getPassword().equals(password))
-                        return "500 Password Invalido\n";
+                        return "501 Password Invalido\n";
                     
                     this.fase = 0;
                     return "200 Rapidin user\n";
@@ -86,10 +89,10 @@ public class RequestParser {
                 
                 if(request.startsWith("GET")){
                     if(user.getUserId() != 0 && !user.getEmail().equals(null)){
-                        ArrayList<Email> emails = _emailRepository.GetEmailByUser(user);
+                        ArrayList<Email> emails = _emailRepository.GetEmailByUser(user, date);
                         
                         if(emails.size() == 0)
-                            return "500 No hay emails\n";
+                            return "202 No hay emails\n";
                         
                         this.fase = 0;
                         return "200 " + emails.toString() + "\n";
