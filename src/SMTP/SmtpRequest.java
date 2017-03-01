@@ -39,7 +39,11 @@ public class SmtpRequest implements Runnable{
                 byte[] request_bytes = new byte[size];
                 in.read(request_bytes);
                 request = new String(request_bytes);                
+                String user = this.socket.getInetAddress().getHostName() + ":" + this.socket.getPort();
+                System.out.println(user +": " + request);
                 String response = requestParser.parse(request);
+                String server = this.socket.getLocalAddress().getHostName() + ":" + this.socket.getPort();
+                System.out.println(server +": " + response);
                 out.write(response.getBytes());
             }
             socket.close();
