@@ -9,10 +9,12 @@ import Models.Email;
 import Models.User;
 import Repositories.EmailRepository;
 import Repositories.UserRepository;
+import com.google.gson.Gson;
+import java.io.FileWriter;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-
+        
 /**
  *
  * @author Diego Jacobs
@@ -26,19 +28,17 @@ public class RequestParser {
     private String password;
     private Timestamp date;
     private String source;
-    private ArrayList<String> destinos = new ArrayList<>();
-    private ArrayList<String> forward = new ArrayList<>();
-    private ArrayList<String> data = new ArrayList<>();
-    private ArrayList<Email> emails = new ArrayList<Email>(); 
+    private Gson gson = new Gson();
     
     public RequestParser(){
         _emailRepository = new EmailRepository();
         _userRepository = new UserRepository();
     }
     public String parse(String request){
+        System.out.println(request);
         if (request.startsWith("QUIT"))
             return "Orale\n";
-        System.out.println(request);
+        
         switch(this.fase){
             // Presentacion
             case 0:
@@ -94,8 +94,10 @@ public class RequestParser {
                         if(emails.size() == 0)
                             return "202 No hay emails\n";
                         
+                        String json = gson.toJson(emails);
+                        
                         this.fase = 0;
-                        return "200 " + emails.toString() + "\n";
+                        return "200 " + json + "\n";
                     }
                     this.fase = 1;
                     return "404 No pertenece a Rapidin\n";
@@ -106,11 +108,4 @@ public class RequestParser {
                 return "500 Rapidin no entiende\n";
         }
     }
-
-    @Override
-    public String toString() {
-        return "Source:" + source + "\nDestinos:\n" + destinos.toString() + "\nData:\n" + data.toString();
-    }
-    
-    
 }

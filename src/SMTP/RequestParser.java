@@ -25,6 +25,7 @@ public class RequestParser {
     
     private ArrayList<String> destinos = new ArrayList<>();
     private ArrayList<String> forward = new ArrayList<>();
+    private ArrayList<String> local = new ArrayList<>();
     
     private ArrayList<String> to = new ArrayList<>();
     private ArrayList<String> cc = new ArrayList<>();
@@ -69,9 +70,10 @@ public class RequestParser {
                     
                     if (userTo.getUserId() == 0){
                         forward.add(to);
-                        return "251 User not local; will forward to " + to.substring(to.indexOf("@")) +"\n";
+                        destinos.add(to);
+                        return "251 User not local; will forward to " + to.substring(to.indexOf("@")+1) +"\n";
                     }
-                    
+                    local.add(userTo.getEmail());
                     destinos.add(userTo.getEmail());
                     return "250 Suave\n";
                 }
@@ -119,16 +121,10 @@ public class RequestParser {
                                 User userTo = _userRepository.GetUserByEmail(to);
 
                                 if(userTo.getUserId() != 0 && !userTo.getEmail().equals(null)){
-                                    if(!destinos.contains(userTo.getEmail()))
-                                        destinos.add(userTo.getEmail());
-                                    
                                     if(!this.to.contains(to))
                                         this.to.add(userTo.getEmail());
                                 }
                                 else{
-                                    if(!forward.contains(to))
-                                        forward.add(to);
-                                    
                                     if(!this.to.contains(to))
                                         this.to.add(to);
                                 }
@@ -143,16 +139,10 @@ public class RequestParser {
                                 User userCc = _userRepository.GetUserByEmail(cc);
 
                                 if(userCc.getUserId() != 0 && !userCc.getEmail().equals(null)){
-                                    if(!destinos.contains(userCc.getEmail()))
-                                        destinos.add(userCc.getEmail());
-                                    
                                     if(!this.cc.contains(cc))
                                         this.cc.add(userCc.getEmail());
                                 }
                                 else{
-                                    if(!forward.contains(cc))
-                                        forward.add(cc);
-                                    
                                     if(!this.cc.contains(cc))
                                         this.cc.add(userCc.getEmail());
                                 }
@@ -167,16 +157,10 @@ public class RequestParser {
                                 User userBcc = _userRepository.GetUserByEmail(bcc);
 
                                 if(userBcc.getUserId() != 0 && !userBcc.getEmail().equals(null)){
-                                    if(!destinos.contains(userBcc.getEmail()))
-                                        destinos.add(userBcc.getEmail());
-                                    
                                     if(!this.bcc.contains(bcc))
                                         this.bcc.add(userBcc.getEmail());
                                 }
                                 else{
-                                    if(!forward.contains(bcc))
-                                        forward.add(bcc);
-                                    
                                     if(!this.bcc.contains(bcc))
                                         this.bcc.add(bcc);
                                 }
@@ -189,13 +173,13 @@ public class RequestParser {
 
                     }
                     
-                    for(String to : this.destinos){
+                    for(String to : this.local){
                         Email email = new Email(this.source, to, this.source, this.to, this.cc, this.bcc, subject, content);
                         _emailRepository.AddEmail(email);
                     }
                     
                     for(String to : this.forward){
-                        Email email = new Email(this.source, to, this.source, this.to, this.cc, this.bcc, subject, content);
+                        Email email = new Email(this.source, to, this.destinos, this.data.toString());
                         emails.add(email);
                     }
                     

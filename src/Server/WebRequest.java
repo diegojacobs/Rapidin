@@ -40,6 +40,7 @@ public class WebRequest implements Runnable {
                 String response = requestParser.parse(request);
                 System.out.println(response);
                 out.write(response.getBytes());
+                out.flush();
             }
             socket.close();
             wq.setFree();

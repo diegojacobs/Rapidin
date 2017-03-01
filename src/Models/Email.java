@@ -97,6 +97,13 @@ public class Email {
         this.Content = Content;
         this.Attachments = Attachments;
     }
+    
+    public Email(String From, String To, ArrayList<String> labelTo, String Content) {
+        this.From = From;
+        this.To = To;
+        this.labelTo = labelTo;
+        this.Content = Content;
+    }
         
     public int getEmailId() {
         return EmailId;
