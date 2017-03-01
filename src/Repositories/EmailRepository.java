@@ -153,7 +153,7 @@ public class EmailRepository {
             if(dbContext.Connection() == null)
                 dbContext.Connect();
             
-            String stm = "SELECT * FROM email WHERE to_email = ? && createddate > ?";
+            String stm = "SELECT * FROM (SELECT * from email WHERE to_email = ?)emails WHERE createddate < ?::timestamp order by createddate desc";
             dbContext.PreparedStatement(stm);
             dbContext.PreparedStatement().setString(1, user.getEmail());  
             dbContext.PreparedStatement().setTimestamp(2, date);  
