@@ -35,7 +35,6 @@ public class RequestParser {
         _userRepository = new UserRepository();
     }
     public String parse(String request){
-        System.out.println(request);
         if (request.startsWith("QUIT"))
             return "Orale\n";
         
@@ -94,7 +93,7 @@ public class RequestParser {
                         if(emails.size() == 0)
                             return "202 No hay emails\n";
                         
-                        String json = gson.toJson(emails);
+                        String json = gson.toJson(emails.get(0));
                         
                         this.fase = 0;
                         return "200 " + json + "\n";

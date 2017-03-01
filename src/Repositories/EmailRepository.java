@@ -32,16 +32,12 @@ public class EmailRepository {
             if(dbContext.Connection() == null)
                 dbContext.Connect();
             
-            String stm = "INSERT INTO email (from_email, to_email, subject, content, labelFrom, labelTo, cc, bcc, date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, now())";
+            String stm = "INSERT INTO email (from_email, to_email, data, createddate) VALUES(?, ?, ?, now())";
             dbContext.PreparedStatement(stm);
             dbContext.PreparedStatement().setString(1, email.getFrom());
             dbContext.PreparedStatement().setString(2, email.getTo());
-            dbContext.PreparedStatement().setString(3, email.getSubject()); 
-            dbContext.PreparedStatement().setString(4, email.getContent());
-            dbContext.PreparedStatement().setString(5, email.getLabelFrom());
-            dbContext.PreparedStatement().setString(6, email.getLabelTo().toString());
-            dbContext.PreparedStatement().setString(7, email.getCc().toString()); 
-            dbContext.PreparedStatement().setString(8, email.getBcc().toString());
+            dbContext.PreparedStatement().setString(3, email.getData());
+            System.out.println(dbContext.PreparedStatement().toString());
             dbContext.SaveChanges();
 
         } catch (SQLException ex) {
@@ -73,8 +69,7 @@ public class EmailRepository {
             String stm = "UPDATE email SET ";
             stm += "from_email = '"+ email.getFrom() + "'";
             stm += ", to_email = '" + email.getTo() +"'";
-            stm += ", subject = '" + email.getSubject() + "'";
-            stm += ", content = '" + email.getContent() + "'";
+            stm += ", subject = '" + email.getData() + "'";
             stm += "WHERE email_id = " + email.getEmailId() + ";";    
             dbContext.CreateStatement();
             dbContext.SaveChanges(stm);
@@ -116,8 +111,8 @@ public class EmailRepository {
                 email.setEmailId(dbContext.ResultSet().getInt(1));
                 email.setFrom(dbContext.ResultSet().getString(2));
                 email.setTo(dbContext.ResultSet().getString(3));
-                email.setSubject(dbContext.ResultSet().getString(4));
-                email.setContent(dbContext.ResultSet().getString(5));
+                email.setData(dbContext.ResultSet().getString(4));
+                email.setDate(dbContext.ResultSet().getDate(5));
             }
             
             return email;
@@ -165,13 +160,8 @@ public class EmailRepository {
                 email.setEmailId(dbContext.ResultSet().getInt(1));
                 email.setFrom(dbContext.ResultSet().getString(2));
                 email.setTo(dbContext.ResultSet().getString(3));
-                email.setSubject(dbContext.ResultSet().getString(4));
-                email.setContent(dbContext.ResultSet().getString(5));
-                email.setDate(dbContext.ResultSet().getDate(6));
-                email.setLabelFrom(dbContext.ResultSet().getString(7));
-                email.setLabelTo(parseToArrayList(dbContext.ResultSet().getString(8)));
-                email.setCc(parseToArrayList(dbContext.ResultSet().getString(9)));
-                email.setBcc(parseToArrayList(dbContext.ResultSet().getString(10)));
+                email.setData(dbContext.ResultSet().getString(4));
+                email.setDate(dbContext.ResultSet().getDate(5));
                 
                 emails.add(email);
             }
@@ -230,16 +220,5 @@ public class EmailRepository {
                 lgr.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
-    }
-    
-    public ArrayList<String> parseToArrayList(String data){
-        ArrayList<String> array = new ArrayList<String>();
-        if(data == null || data.isEmpty())
-            return array;
-        
-        List<String> list = Arrays.asList(data.substring(1, data.length() - 1).split(", ")); 
-        array = new ArrayList<String>(list);
-        
-        return array;
     }
 }

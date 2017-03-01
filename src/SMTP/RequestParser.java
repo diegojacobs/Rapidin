@@ -26,12 +26,8 @@ public class RequestParser {
     private ArrayList<String> destinos = new ArrayList<>();
     private ArrayList<String> forward = new ArrayList<>();
     private ArrayList<String> local = new ArrayList<>();
-    
-    private ArrayList<String> to = new ArrayList<>();
-    private ArrayList<String> cc = new ArrayList<>();
-    private ArrayList<String> bcc = new ArrayList<>();
-    
-    private ArrayList<String> data = new ArrayList<>();
+
+    private String data = new String();
     private ArrayList<Email> emails = new ArrayList<Email>(); 
     
     public RequestParser(){
@@ -86,108 +82,25 @@ public class RequestParser {
             // Data
             case 3:
                 if(request.startsWith(".")){
-                    String subject = new String();
-                    String from = new String();
-                    Boolean isContent = true;
-                    this.fase = 1;
-                    
-                    // Guardar en DB
-                    String content = new String();
-                    for(String line : this.data){
-                        //Hasta el cambio de linea
-                        line = line.substring(0, line.indexOf(13));
-                        isContent = true;
-                        
-                        //Si escribio subject lo guardamos
-                        if(line.startsWith("SUBJECT:")){
-                            subject = line.substring(8);
-                            isContent = false;
-                        }
-                        
-                        //Si volivo a escribir from, lo cambiamos
-                        if(line.startsWith("FROM:")){
-                            if(line.contains("<")&& line.contains(">")){
-                                from = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                source = from;
-                            }
-                            
-                            isContent = false;
-                        }
-                        
-                        //Si escribe to, miramos si aun no esta en el listado, si no esta lo incluimos
-                        if(line.startsWith("TO:")){
-                            if(line.contains("<") && line.contains(">")){
-                                String to = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                User userTo = _userRepository.GetUserByEmail(to);
-
-                                if(userTo.getUserId() != 0 && !userTo.getEmail().equals(null)){
-                                    if(!this.to.contains(to))
-                                        this.to.add(userTo.getEmail());
-                                }
-                                else{
-                                    if(!this.to.contains(to))
-                                        this.to.add(to);
-                                }
-                            }
-                            isContent = false;
-                        }
-                        
-                        //Si escribe cc, miramos si aun no esta en el listado, si no esta lo incluimos
-                        if(line.startsWith("CC:")){
-                            if(line.contains("<") && line.contains(">")){
-                                String cc = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                User userCc = _userRepository.GetUserByEmail(cc);
-
-                                if(userCc.getUserId() != 0 && !userCc.getEmail().equals(null)){
-                                    if(!this.cc.contains(cc))
-                                        this.cc.add(userCc.getEmail());
-                                }
-                                else{
-                                    if(!this.cc.contains(cc))
-                                        this.cc.add(userCc.getEmail());
-                                }
-                            }
-                            isContent = false;
-                        }
-                        
-                        //Si escribe bcc, miramos si aun no esta en el listado, si no esta lo incluimos
-                        if(line.startsWith("BCC:")){
-                            if(line.contains("<") && line.contains(">")){
-                                String bcc = line.substring(line.indexOf('<') + 1, line.indexOf('>'));
-                                User userBcc = _userRepository.GetUserByEmail(bcc);
-
-                                if(userBcc.getUserId() != 0 && !userBcc.getEmail().equals(null)){
-                                    if(!this.bcc.contains(bcc))
-                                        this.bcc.add(userBcc.getEmail());
-                                }
-                                else{
-                                    if(!this.bcc.contains(bcc))
-                                        this.bcc.add(bcc);
-                                }
-                            }
-                            isContent = false;
-                        }
-                        
-                        if(isContent)
-                            content += line + "\n";
-
-                    }
-                    
                     for(String to : this.local){
-                        Email email = new Email(this.source, to, this.source, this.to, this.cc, this.bcc, subject, content);
+                        String data = this.data.toString().replaceAll("[^\\u0000-\\uFFFF]", "");
+                        Email email = new Email(this.source, to, data);
                         _emailRepository.AddEmail(email);
                     }
-                    
+
                     for(String to : this.forward){
-                        Email email = new Email(this.source, to, this.destinos, this.data.toString());
+                        Email email = new Email(this.source, to, this.data.toString());
                         emails.add(email);
                     }
-                    
+
                     this.destinos = new ArrayList<>();
-                    this.data = new ArrayList<>();
+                    this.local = new ArrayList<String>();
+                    this.forward = new ArrayList<String>();
+                    this.data = new String();
                     return "250 Data recibida\n";
                 }
-                this.data.add(request);
+                
+                this.data += request;
                 return "";
             default: 
                 return "500 Rapidin no entiende\n";
@@ -196,8 +109,6 @@ public class RequestParser {
 
     @Override
     public String toString() {
-        return "RequestParser{" + "hostname=" + hostname + ", source=" + source + ", destinos=" + destinos + ", forward=" + forward + ", to=" + to + ", cc=" + cc + ", bcc=" + bcc + ", data=" + data + ", emails=" + emails + '}';
+        return "RequestParser{" + "hostname=" + hostname + ", source=" + source + ", destinos=" + destinos + ", forward=" + forward + ", local=" + local + ", data=" + data + '}';
     }
-
-    
 }

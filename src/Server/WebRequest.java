@@ -36,11 +36,13 @@ public class WebRequest implements Runnable {
             while(!request.startsWith("QUIT")){                
                 byte[] request_bytes = new byte[size];
                 in.read(request_bytes);
-                request = new String(request_bytes);                
+                request = new String(request_bytes); 
+                String user = this.socket.getInetAddress().getHostName() + ":" + this.socket.getPort();
+                System.out.println(user +": " + request);
                 String response = requestParser.parse(request);
-                System.out.println(response);
+                String server = this.socket.getLocalAddress().getHostName() + ":" + this.socket.getPort();
+                System.out.println(server +": " + response);
                 out.write(response.getBytes());
-                out.flush();
             }
             socket.close();
             wq.setFree();
