@@ -32,7 +32,7 @@ public class EmailRepository {
             if(dbContext.Connection() == null)
                 dbContext.Connect();
             
-            String stm = "INSERT INTO email (from_email, to_email, subject, content, labelFrom, labelTo, cc, bcc, date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, now())";
+            String stm = "INSERT INTO email (from_email, to_email, subject, content, labelFrom, labelTo, cc, bcc, createddate) VALUES(?, ?, ?, ?, ?, ?, ?, ?, now())";
             dbContext.PreparedStatement(stm);
             dbContext.PreparedStatement().setString(1, email.getFrom());
             dbContext.PreparedStatement().setString(2, email.getTo());
