@@ -10,8 +10,6 @@ import Models.User;
 import Repositories.EmailRepository;
 import Repositories.UserRepository;
 import com.google.gson.Gson;
-import java.io.FileWriter;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
         
@@ -88,12 +86,16 @@ public class RequestParser {
                 
                 if(request.startsWith("GET")){
                     if(user.getUserId() != 0 && !user.getEmail().equals(null)){
-                        ArrayList<Email> emails = _emailRepository.GetEmailByUser(user, date);
+                        ArrayList<Email> list = _emailRepository.GetEmailByUser(user, date);
                         
-                        if(emails.size() == 0)
+                        if(list.isEmpty())
                             return "202 No hay emails\n";
-                        
-                        String json = gson.toJson(emails.get(0));
+                        Email[] Emails = new Email[list.size()];
+                            for(int i=0; i<list.size(); i++){
+                                Emails[i] = list.get(i);
+                            }; 
+                            
+                        String json = gson.toJson(Emails);
                         
                         this.fase = 0;
                         return "200 " + json + "\n";
