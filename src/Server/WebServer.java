@@ -66,6 +66,8 @@ public class WebServer implements Runnable{
         }
         } catch (Exception ex) {
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("--- RAPIDIN SERVER CONNECTION ERROR ---"); 
         }
+        System.out.println("--- RAPIDIN SERVER CONNECTION CLOSE ---"); 
     }
 }

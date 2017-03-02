@@ -3,11 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204/Rapidin/src/Repositories/UserRepository.java</file>
-            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204/Rapidin/src/Rapidin/Rapidin.java</file>
-            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204/Rapidin/src/WebServer/SmtpRequest.java</file>
-            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204/Rapidin/src/WebServer/RequestParser.java</file>
-            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204/Rapidin/src/WebServer/WebServer.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/Server/WebRequest.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/SMTP/SmtpRequest.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/SMTP/RequestParser.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/Server/RequestParser.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/Rapidin/Rapidin.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/Server/WebServer.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/Models/Email.java</file>
+            <file>file:/D:/Diego%20Jacobs/Google%20Dirve/UVG/Semestre%209/Redes/Laboratorios/Lab%204%20y%205/Rapidin/src/Repositories/EmailRepository.java</file>
         </group>
     </open-files>
 </project-private>
