@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * @author DanielAlejandro
  */
 public class SMTP  implements Runnable{
-    private int port = 2407;
+    private int port = 2508;
     private String configFile = "config.txt";
     private int maxThreads = 0;
     
@@ -63,9 +63,11 @@ public class SMTP  implements Runnable{
                 thread.start();
                 id++;
             }
+ 
         } catch (Exception ex) {
             Logger.getLogger(SMTP.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("--- RAPIDIN SMTP CONNECTION ERROR ---");     
         }
-        
+        System.out.println("--- RAPIDIN SMTP CONNECTION CLOSE ---");         
     }
 }

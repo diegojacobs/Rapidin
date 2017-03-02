@@ -10,6 +10,7 @@ import Models.User;
 import Repositories.EmailRepository;
 import Repositories.UserRepository;
 import java.sql.SQLException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 
 /**
@@ -83,13 +84,16 @@ public class RequestParser {
             case 3:
                 if(request.startsWith(".")){
                     for(String to : this.local){
-                        String data = this.data.toString().replaceAll("[^\\u0000-\\uFFFF]", "");
+                        Character c = 0;
+                        data = data.replaceAll(c.toString(), "");
+                        c = 13;
+                        data = data.replaceAll(c.toString(), "");
                         Email email = new Email(this.source, to, data);
                         _emailRepository.AddEmail(email);
                     }
 
                     for(String to : this.forward){
-                        Email email = new Email(this.source, to, this.data.toString());
+                        Email email = new Email(this.source, to, this.data);
                         emails.add(email);
                     }
 
@@ -101,7 +105,7 @@ public class RequestParser {
                 }
                 
                 this.data += request;
-                return "";
+                return "ok";
             default: 
                 return "500 Rapidin no entiende\n";
         }

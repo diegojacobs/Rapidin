@@ -5,11 +5,15 @@
  */
 package SMTP;
 
+import Rapidin.Rapidin;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,21 +35,28 @@ public class SmtpRequest implements Runnable{
     @Override
     public void run(){
         try{
+            System.out.println("SOCKET INITIATE");
             String request = "";
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            out.writeInt("\n220 rapidin.com\n".length());
             out.write("\n220 rapidin.com\n".getBytes());
-            while(!request.startsWith("QUIT")){                
-                byte[] request_bytes = new byte[size];
+            while(!request.startsWith("QUIT")){          
+                System.out.println("Esperando escritura");
+                int length = in.readInt();
+                byte[] request_bytes = new byte[length];
                 in.read(request_bytes);
-                request = new String(request_bytes);                
+                request = new String(request_bytes, "UTF-8");                
                 String user = this.socket.getInetAddress().getHostName() + ":" + this.socket.getPort();
                 System.out.println(user +": " + request);
                 String response = requestParser.parse(request);
                 String server = this.socket.getLocalAddress().getHostName() + ":" + this.socket.getPort();
                 System.out.println(server +": " + response);
+                out.writeInt(response.length());
                 out.write(response.getBytes());
+                out.flush();
             }
+            System.out.println("SOCKET CLOSE");
             socket.close();
             wq.setFree();
         }
