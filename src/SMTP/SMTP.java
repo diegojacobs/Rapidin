@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * @author DanielAlejandro
  */
 public class SMTP  implements Runnable{
-    private int port = 2508;
+    private int port = 12000;
     private String configFile = "config.txt";
     private int maxThreads = 0;
     

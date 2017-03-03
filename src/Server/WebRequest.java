@@ -18,7 +18,7 @@ import java.net.Socket;
 public class WebRequest implements Runnable {
     private RequestParser requestParser = new RequestParser();
     private Socket socket;
-    private int size = 256;
+    private int size = 100000;
     private WorkingQueue wq;
     private int id;
 
@@ -37,7 +37,7 @@ public class WebRequest implements Runnable {
             System.out.println("SOCKET INITIATE");
             while(!request.startsWith("QUIT")){  
                 System.out.println("Esperando escritura");
-                size = in.readInt();
+                //size = in.readInt();
                 System.out.println(size);
                 byte[] request_bytes = new byte[size];
                 in.read(request_bytes);
@@ -48,7 +48,7 @@ public class WebRequest implements Runnable {
                 String server = this.socket.getLocalAddress().getHostName() + ":" + this.socket.getPort();
                 System.out.println(server +": " + response);
                 System.out.println(response.length());
-                out.writeInt(response.length()+10);
+                //out.writeInt(response.length()+10);
                 out.write(response.getBytes());
                 out.flush();
             }

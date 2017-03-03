@@ -39,20 +39,20 @@ public class SmtpRequest implements Runnable{
             String request = "";
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            out.writeInt("\n220 rapidin.com\n".length());
+            //out.writeInt("\n220 rapidin.com\n".length());
             out.write("\n220 rapidin.com\n".getBytes());
             while(!request.startsWith("QUIT")){          
                 System.out.println("Esperando escritura");
-                int length = in.readInt();
-                byte[] request_bytes = new byte[length];
+                //size = in.readInt();
+                byte[] request_bytes = new byte[size];
                 in.read(request_bytes);
                 request = new String(request_bytes, "UTF-8");                
                 String user = this.socket.getInetAddress().getHostName() + ":" + this.socket.getPort();
                 System.out.println(user +": " + request);
-                String response = requestParser.parse(request);
+                String response = requestParser.parse(request.toLowerCase());
                 String server = this.socket.getLocalAddress().getHostName() + ":" + this.socket.getPort();
                 System.out.println(server +": " + response);
-                out.writeInt(response.length());
+                //out.writeInt(response.length());
                 out.write(response.getBytes());
                 out.flush();
             }
