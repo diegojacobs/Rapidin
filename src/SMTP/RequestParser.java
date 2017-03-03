@@ -36,12 +36,12 @@ public class RequestParser {
         _userRepository = new UserRepository();
     }
     public String parse(String request){
-        if (request.startsWith("QUIT"))
+        if (request.startsWith("quit"))
             return "Orale\n";
         switch(this.fase){
             // Presentacion
             case 0:
-                if(!request.startsWith("HELO")) 
+                if(!request.startsWith("helo")) 
                     return "500 Mal educado!\n";
                 
                 hostname = request.substring(5);
@@ -49,7 +49,7 @@ public class RequestParser {
                 return "250 Que diesel " + hostname;
             // From
             case 1:
-                if(!request.startsWith("MAIL FROM:") || !request.contains("<") || !request.contains(">")) 
+                if(!request.startsWith("mail from:") || !request.contains("<") || !request.contains(">")) 
                     return "500 Rapidin no entiende\n";
                 
                 source = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
@@ -58,13 +58,13 @@ public class RequestParser {
                 return "250 Suave\n";
             // To
             case 2:
-                if((!request.startsWith("RCPT TO:")) && (!request.startsWith("DATA"))) 
+                if((!request.startsWith("rcpt to:")) && (!request.startsWith("data"))) 
                     return "500 Rapidin no entiende\n";
                 
-                if(request.startsWith("RCPT TO:") && request.contains("<") && request.contains(">")){
+                if(request.startsWith("rcpt to:") && request.contains("<") && request.contains(">")){
                     String to = request.substring(request.indexOf('<') + 1, request.indexOf('>'));
                     User userTo = _userRepository.GetUserByEmail(to);
-                    
+                    System.out.println(userTo.toString());
                     if (userTo.getUserId() == 0){
                         forward.add(to);
                         destinos.add(to);
@@ -82,8 +82,10 @@ public class RequestParser {
                 return "354 Dejala venir. Para terminar data usa el simbolo \".\"\n";
             // Data
             case 3:
+                System.out.println(this.fase);
                 if(request.startsWith(".")){
                     for(String to : this.local){
+                        System.out.println("Local: " + to);
                         Character c = 0;
                         data = data.replaceAll(c.toString(), "");
                         c = 13;
@@ -93,6 +95,7 @@ public class RequestParser {
                     }
 
                     for(String to : this.forward){
+                        System.out.println("Forward: " + to);
                         Email email = new Email(this.source, to, this.data);
                         emails.add(email);
                     }
@@ -105,7 +108,6 @@ public class RequestParser {
                 }
                 
                 this.data += request;
-                return "ok";
             default: 
                 return "500 Rapidin no entiende\n";
         }
